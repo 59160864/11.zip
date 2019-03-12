@@ -1,8 +1,12 @@
 zone "mynet-864.com" {
-        type  master;
-        file "/etc/named/zones/db.mynet-864.com" ; # zone file path
+    type master;
+    file "/etc/named/zones/db.mynet-864.com"; 
+};
+zone "my-site.com" {
+    type master;
+    file "/etc/named/zones/db.my-site.com"; 
 };
 zone "100.168.192.in-addr.arpa" {
     type master;
-    file "/etc/named/zones/db.192.168.100";  # 192.168.100.0/24 subnet
+    file "/etc/named/zones/db.192.168.100";  
 };

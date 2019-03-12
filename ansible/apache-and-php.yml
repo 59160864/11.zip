@@ -1,0 +1,127 @@
+---
+- hosts: web
+  become: yes
+  become_user: root
+  tasks:
+  - name: Install remi repo.
+    yum:
+      name: http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
+      state: latest
+      
+  - name: Import remi GPG key.
+    rpm_key:
+      key: http://rpms.remirepo.net/RPM-GPG-KEY-remi
+      state: present
+  - name: Install PHP and Httpd
+    yum:
+      name:
+        - httpd
+        - php
+        - php-cli
+        - php-fpm
+        - php-mysqlnd
+        - php-zip
+        - php-devel
+        - php-gd
+        - php-mcrypt
+        - php-mbstring
+        - php-curl
+        - php-xml
+        - php-pear
+        - php-bcmath
+        - php-json
+      state: latest
+      enablerepo: remi-php73
+
+  - name: Edit TImezone
+    lineinfile:
+      path: /etc/php.ini
+      regexp: ';date.timezone'
+      line: 'date.timezone=Asia/Bangkok'
+      backup: yes
+
+  - name: enable httpd
+    service:
+      name: httpd
+      enabled: yes
+
+  - name: start httpd
+    service:
+      name: httpd
+      state: started
+  - name: enable firewalld
+    service:
+      name: firewalld
+      enabled: yes
+
+  - name: start firewall
+    service:
+      name: firewalld
+      state: started
+
+  - name: Open firewall
+    firewalld: 
+      port: '{{ item }}' 
+      permanent: yes 
+      state: enabled
+    loop:
+    - "80/tcp"
+    - "443/tcp"   
+
+  - name: Restart firewalld
+    service: 
+      name: firewalld 
+      state: restarted
+  
+  - name: copy Index.php
+    template: 
+      src: 'template/index.php.j2'
+      dest: '/var/www/html/index.php'
+      owner: root
+      group: root
+      mode: "775"
+
+- hosts: db
+  become: yes
+  become_user: root
+
+  tasks:
+  - name: install maria-db
+    yum:
+      name: mariadb-server
+      state: latest
+
+  - name: Enable maria-db
+    service:
+      name: mariadb
+      enabled: yes
+  
+  - name: start maria-db
+    service:
+      name: mariadb
+      state: started
+
+  - name: enable firewalld
+    service:
+      name: firewalld
+      enabled: yes
+
+  - name: start firewall
+    service:
+      name: firewalld
+      state: started
+
+  - name: Open firewall
+    firewalld: 
+      port: '3306/tcp' 
+      permanent: yes 
+      state: enabled 
+
+  - name: Restart firewalld
+    service: 
+      name: firewalld 
+      state: restarted
+
+  
+      
+  
