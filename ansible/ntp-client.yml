@@ -5,20 +5,21 @@
   tasks:
   - name: Install NTP Server
     yum: name=ntp state=latest
-  - name: IP
-    lineinfile: path=/etc/ntp.conf regexp='^#restrict' line='restrict 192.168.100.0 mask 255.255.255.0 nomodify notrap'
-  - name: IP server 0
-    lineinfile: path=/etc/ntp.conf regexp='^server 0' line='192.168.100.11'
-  - name: IP server 1
+  - name:
+    lineinfile: path=/etc/ntp.conf regexp='^#restrict 192.168.1.0' line='restrict 192.168.100.0 mask 255.255.255.0 nomodify notrap'
+  - name:
+    lineinfile: path=/etc/ntp.conf regexp='^server 0' line='server 3.th.pool.ntp.org iburst'
+  - name:
     lineinfile: path=/etc/ntp.conf regexp='^server 1' line=''
-  - name: IP server 2
+  - name:
     lineinfile: path=/etc/ntp.conf regexp='^server 2' line=''
-  - name: IP server 3
+  - name:
     lineinfile: path=/etc/ntp.conf regexp='^server 3' line=''
   - name: Install firewalld
     yum: name=firewalld state=latest
+    
   - name: Start firewalld
-    service: name=firewalld state=started
+    service: name=firewalld state=started 
   - name: Open firewall
     firewalld: service=ntp permanent=yes state=enabled
   - name: Restart firewalld

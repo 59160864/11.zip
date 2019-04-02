@@ -1,0 +1,127 @@
+---
+- hosts: web
+  become: yes
+  become_user: root
+  tasks:
+  - name: Install remi repo.
+    yum:
+      name: http://rpms.famillecollet.com/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm
+      state: present
+  - name: Import remi GPG key.
+    rpm_key:
+      key: http://rpms.remirepo.net/RPM-GPG-KEY-remi
+      state: present
+  - name: Install php73
+    yum: 
+      name: 
+        - php 
+        - php-cli 
+        - php-fpm 
+        - php-mysqlnd 
+        - php-zip 
+        - php-devel 
+        - php-gd 
+        - php-mcrypt 
+        - php-mbstring 
+        - php-curl 
+        - php-xml 
+        - php-pear 
+        - php-bcmath 
+        - php-json
+      state: latest
+      enablerepo: remi-php73
+
+  - name: edit time zone
+    lineinfile:
+      path: /etc/php.ini
+      regexp: ';date.timezone'
+      line: 'date.timezone = Asia/Bangkok'
+      backup: yes
+  
+  - name: enabled service httpd
+    service:
+      name: httpd
+      enabled: yes
+  
+  - name: enabled firewalld
+    service:
+      name: firewalld
+      enabled: yes
+
+  - name: start service httpd
+    service:
+      name: httpd
+      state: started
+  
+  - name: start firewalld
+    service:
+      name: firewalld
+      state: started
+
+  - name: open firewalld
+    firewalld:
+      service: '{{ item }}'
+      permanent: yes
+      state: enabled
+    loop:
+      - "http"
+      - "https"
+
+  - name: restart firewalld
+    service:
+      name: firewalld
+      state: restarted
+  
+  - name: copy index.php
+    template:
+      src: 'template/index.php.j2'
+      dest: '/var/www/html/index.php'
+      owner: root
+      group: root
+      mode: "0755"
+
+- hosts: db
+  become: yes
+  become_user: root
+  tasks:
+  - name: install mariadb
+    yum:
+      name: mariadb-server
+      state: latest
+  
+  - name: enable service mariadb
+    service:
+      name: mariadb
+      enabled: yes
+
+  - name: start mariadb
+    service:
+      name: mariadb
+      state: started
+  
+  - name: enabled firewalld
+    service:
+      name: firewalld
+      enabled: yes
+
+  - name: start firewalld
+    service:
+      name: firewalld
+      state: started
+  
+  - name: open firewalld
+    firewalld:
+      port: '3306/tcp'
+      permanent: yes
+      state: enabled
+
+  - name: restart firewalld
+    service:
+      name: firewalld
+      state: restarted
+
+
+  
+
+
+
